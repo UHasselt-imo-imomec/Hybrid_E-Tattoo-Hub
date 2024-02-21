@@ -1,4 +1,4 @@
-/*
+
 #include <Arduino.h>
 #include <MAX3010x.h>
 #include "filters.h"
@@ -127,9 +127,9 @@ void loop() {
     last_diff = current_diff;
   }
 }
-*/
 
 
+/*
 
 //I2CScanner
 #include <Arduino.h>
@@ -187,3 +187,4 @@ void loop()
   delay(5000);           // wait 5 seconds for next scan
 }
 
+*/
