@@ -1,0 +1,16 @@
+If the grafana container isn't running, start the containen via Docker Desktop.
+
+• Point your browser to “localhost:3000”, Use “admin” as user/pass
+• Add a new Data Source:
+	- Choose a namePick “Flux” as the query language
+	- Use the InfluxDB urlSelect no Auth options
+	- Add no Custom HTTP headers
+	- Fill out your “organisation ID” (Not the name, find it in InfluxDB)
+• Test the connection and build a simple query:
+
+Example query:
+from(bucket: "ECG")
+	|> range(start: v.timeRangeStart, stop:v.timeRangeStop)
+	|> filter(fn: (r) =>
+		r._measurement == "Sensor_Data" and
+		r._field == "ECG")

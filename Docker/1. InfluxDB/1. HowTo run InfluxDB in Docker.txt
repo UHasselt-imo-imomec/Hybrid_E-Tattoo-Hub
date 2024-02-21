@@ -1,0 +1,13 @@
+Make use of the Docker Hub to pull the InfluxDB image:
+
+• Win10 host: "docker run --name influxdbLocalStorage -d -p 8080:8086 -v"C:\InfluxDB\EHealth:/var/lib/influxdb2" -v "C:\InfluxDB\EHealth\config.yml:/etc/influxdb2/config.yml" --restart unless-stopped influxdb:latest"
+
+• Linux Host: “docker run --name influxdbLocalStorage -d -p 8080:8086 -v~/Desktop/influxdb2:/var/lib/influxdb2 -v ~/Desktop/influxdb2/config.yml:/etc/influxdb2/config.yml --restart unless-stopped influxdb:latest”
+
+• This command pulls the image from the hub, sets up the local storage,configs the port, stores the yml and data outside of the container, makessure the container keeps running and finally starts the container.
+• Now it can be managed through Docker Desktop
+
+• Access the InfluxDB webinterface through:localhost:8080
+• Go through the “Getting Started” wizard: Set up the users, password,organization etc
+
+

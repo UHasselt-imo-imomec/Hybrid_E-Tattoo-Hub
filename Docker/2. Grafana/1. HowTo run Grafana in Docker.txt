@@ -1,0 +1,6 @@
+Visualize data in Grafana
+Plan: (screenshots on the next slides)
+• Start your InfluxDB container
+• Make a new token for your ECG bucket (Call it “Grafana”)Make sure to temporary save this token!
+• Spin up a “Grafana” container:“docker run -d --name=grafana -p 3000:3000 grafana/grafana”
+• Point your browser to “localhost:3000”, Use “admin” as user/pass
