@@ -1,5 +1,5 @@
 //Test clone
-//Laurence//
+//Laurence demo
 #include <Arduino.h>
 #include <MAX3010x.h>
 #include "filters.h"
