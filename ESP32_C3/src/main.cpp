@@ -6,7 +6,6 @@
 #include "filters.h"
 
 #define TCAADDR 0x70
-
 #define BMP280_ADDRESS 0x76
 #define BH1750_ADDRESS 0x23
 #define MAX30100_ADDRESS 0x57
@@ -34,6 +33,24 @@ const bool kEnableAveraging = true;
 const int kAveragingSamples = 50;
 const int kSampleThreshold = 5;
 
+// Filter Instances
+HighPassFilter high_pass_filter(kHighPassCutoff, kSamplingFrequency);
+LowPassFilter low_pass_filter(kLowPassCutoff, kSamplingFrequency);
+Differentiator differentiator(kSamplingFrequency);
+MovingAverageFilter<kAveragingSamples> averager;
+
+// Timestamp of the last heartbeat
+long last_heartbeat = 0;
+
+// Timestamp for finger detection
+long finger_timestamp = 0;
+bool finger_detected = false;
+
+// Last diff to detect zero crossing
+float last_diff = NAN;
+bool crossed = false;
+long crossed_time = 0;
+
 void tcaselect(uint8_t i) {
   if (i > 7) return;
  
@@ -42,13 +59,10 @@ void tcaselect(uint8_t i) {
   Wire.endTransmission();  
 }
 
-
-// standard Arduino setup()
-void setup()
-{
-  Serial.begin(115200);
-
+void setup(){
+    
   delay(5000);
+  Serial.begin(115200);
   Serial.println("Test");
 
   Wire.begin();
@@ -110,89 +124,68 @@ void setup()
   
 
   Serial.println("Aight lets cook");
-  /* Display some basic information on this sensor */
-
 }
 
-// Filter Instances
-HighPassFilter high_pass_filter(kHighPassCutoff, kSamplingFrequency);
-LowPassFilter low_pass_filter(kLowPassCutoff, kSamplingFrequency);
-Differentiator differentiator(kSamplingFrequency);
-MovingAverageFilter<kAveragingSamples> averager;
-
-// Timestamp of the last heartbeat
-long last_heartbeat = 0;
-
-// Timestamp for finger detection
-long finger_timestamp = 0;
-bool finger_detected = false;
-
-// Last diff to detect zero crossing
-float last_diff = NAN;
-bool crossed = false;
-long crossed_time = 0;
-
-void loop() 
-{
-  tcaselect(7);
-  auto sample = sensor.readSample(1000);
-  float current_value = sample.red;
-  
-  // Detect Finger using raw sensor value
-  if(sample.red > kFingerThreshold) {
-    if(millis() - finger_timestamp > kFingerCooldownMs) {
-      finger_detected = true;
-    }
-  }
-  else {
-    // Reset values if the finger is removed
-    differentiator.reset();
-    averager.reset();
-    low_pass_filter.reset();
-    high_pass_filter.reset();
+void loop(){
+    tcaselect(7);
+    auto sample = sensor.readSample(1000);
+    float current_value = sample.red;
     
-    finger_detected = false;
-    finger_timestamp = millis();
-  }
-
-  if(finger_detected) {
-    current_value = low_pass_filter.process(current_value);
-    current_value = high_pass_filter.process(current_value);
-    float current_diff = differentiator.process(current_value);
-
-    // Valid values?
-    if(!isnan(current_diff) && !isnan(last_diff)) {
-      
-      // Detect Heartbeat - Zero-Crossing
-      if(last_diff > 0 && current_diff < 0) {
-        crossed = true;
-        crossed_time = millis();
+    // Detect Finger using raw sensor value
+    if(sample.red > kFingerThreshold) {
+      if(millis() - finger_timestamp > kFingerCooldownMs) {
+        finger_detected = true;
       }
+    }
+    else {
+      // Reset values if the finger is removed
+      differentiator.reset();
+      averager.reset();
+      low_pass_filter.reset();
+      high_pass_filter.reset();
       
-      if(current_diff > 0) {
-        crossed = false;
-      }
-  
-      // Detect Heartbeat - Falling Edge Threshold
-      if(crossed && current_diff < kEdgeThreshold) {
-        if(last_heartbeat != 0 && crossed_time - last_heartbeat > 300) {
-          // Show Results
-          int bpm = 60000/(crossed_time - last_heartbeat);
-          if(bpm > 50 && bpm < 250) {
-            // Average?
-            if(kEnableAveraging) {
-              int average_bpm = averager.process(bpm);
-  
-              // Show if enough samples have been collected
-              if(averager.count() > kSampleThreshold) {
-                Serial.print("Heart Rate (avg, bpm): ");
-                Serial.println(average_bpm);
+      finger_detected = false;
+      finger_timestamp = millis();
+    }
+
+    if(finger_detected) {
+      current_value = low_pass_filter.process(current_value);
+      current_value = high_pass_filter.process(current_value);
+      float current_diff = differentiator.process(current_value);
+
+      // Valid values?
+      if(!isnan(current_diff) && !isnan(last_diff)) {
+        
+        // Detect Heartbeat - Zero-Crossing
+        if(last_diff > 0 && current_diff < 0) {
+          crossed = true;
+          crossed_time = millis();
+        }
+        
+        if(current_diff > 0) {
+          crossed = false;
+        }
+    
+        // Detect Heartbeat - Falling Edge Threshold
+        if(crossed && current_diff < kEdgeThreshold) {
+          if(last_heartbeat != 0 && crossed_time - last_heartbeat > 300) {
+            // Show Results
+            int bpm = 60000/(crossed_time - last_heartbeat);
+            if(bpm > 50 && bpm < 250) {
+              // Average?
+              if(kEnableAveraging) {
+                int average_bpm = averager.process(bpm);
+    
+                // Show if enough samples have been collected
+                if(averager.count() > kSampleThreshold) {
+                  Serial.print("Heart Rate (avg, bpm): ");
+                  Serial.println(average_bpm);
+                }
               }
-            }
-            else {
-              Serial.print("Heart Rate (current, bpm): ");
-              Serial.println(bpm);  
-            }
+              else {
+                Serial.print("Heart Rate (current, bpm): ");
+                Serial.println(bpm);  
+              }
               tcaselect(6);
               float temp=bmp.readTemperature();
               float pressure=bmp.readPressure();
@@ -217,12 +210,12 @@ void loop()
               Serial.print(lux);
               Serial.println(" ...");
               Serial.println("");
+            }
           }
+          crossed = false;
+          last_heartbeat = crossed_time;
         }
-        crossed = false;
-        last_heartbeat = crossed_time;
       }
+      last_diff = current_diff;
     }
-    last_diff = current_diff;
-  }
 }
