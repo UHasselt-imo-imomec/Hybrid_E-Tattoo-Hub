@@ -1,8 +1,16 @@
-//Test clone
-//Laurence demo
 #include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_BMP280.h>
 #include <MAX3010x.h>
+#include <hp_BH1750.h> 
 #include "filters.h"
+
+#define TCAADDR 0x70
+#define BMP280_ADDRESS 0x76
+#define BH1750_ADDRESS 0x23
+#define MAX30100_ADDRESS 0x57
+Adafruit_BMP280 bmp; // I2C
+hp_BH1750 BH1750;       //  create the sensor
 
 // Sensor (adjust to your sensor type)
 MAX30105 sensor;
@@ -25,21 +33,6 @@ const bool kEnableAveraging = true;
 const int kAveragingSamples = 50;
 const int kSampleThreshold = 5;
 
-void setup() {
-  Serial.begin(115200);
-
-  delay(5000);
-  Serial.println("Test");
-
-  if(sensor.begin() && sensor.setSamplingRate(kSamplingRate)) { 
-    Serial.println("Sensor initialized");
-  }
-  else {
-    Serial.println("Sensor not found");  
-    while(1);
-  }
-}
-
 // Filter Instances
 HighPassFilter high_pass_filter(kHighPassCutoff, kSamplingFrequency);
 LowPassFilter low_pass_filter(kLowPassCutoff, kSamplingFrequency);
@@ -58,134 +51,100 @@ float last_diff = NAN;
 bool crossed = false;
 long crossed_time = 0;
 
-void loop() {
-  auto sample = sensor.readSample(1000);
-  float current_value = sample.red;
-  
-  // Detect Finger using raw sensor value
-  if(sample.red > kFingerThreshold) {
-    if(millis() - finger_timestamp > kFingerCooldownMs) {
-      finger_detected = true;
-    }
-  }
-  else {
-    // Reset values if the finger is removed
-    differentiator.reset();
-    averager.reset();
-    low_pass_filter.reset();
-    high_pass_filter.reset();
+void tcaselect(uint8_t i) {
+  if (i > 7) return;
+ 
+  Wire.beginTransmission(TCAADDR);
+  Wire.write(1 << i);
+  Wire.endTransmission();  
+}
+
+void setup(){
     
-    finger_detected = false;
-    finger_timestamp = millis();
-  }
-
-  if(finger_detected) {
-    current_value = low_pass_filter.process(current_value);
-    current_value = high_pass_filter.process(current_value);
-    float current_diff = differentiator.process(current_value);
-
-    // Valid values?
-    if(!isnan(current_diff) && !isnan(last_diff)) {
-      
-      // Detect Heartbeat - Zero-Crossing
-      if(last_diff > 0 && current_diff < 0) {
-        crossed = true;
-        crossed_time = millis();
-      }
-      
-      if(current_diff > 0) {
-        crossed = false;
-      }
-  
-      // Detect Heartbeat - Falling Edge Threshold
-      if(crossed && current_diff < kEdgeThreshold) {
-        if(last_heartbeat != 0 && crossed_time - last_heartbeat > 300) {
-          // Show Results
-          int bpm = 60000/(crossed_time - last_heartbeat);
-          if(bpm > 50 && bpm < 250) {
-            // Average?
-            if(kEnableAveraging) {
-              int average_bpm = averager.process(bpm);
-  
-              // Show if enough samples have been collected
-              if(averager.count() > kSampleThreshold) {
-                Serial.print("Heart Rate (avg, bpm): ");
-                Serial.println(average_bpm);
-              }
-            }
-            else {
-              Serial.print("Heart Rate (current, bpm): ");
-              Serial.println(bpm);  
-            }
-          }
-        }
-  
-        crossed = false;
-        last_heartbeat = crossed_time;
-      }
-    }
-
-    last_diff = current_diff;
-  }
-}
-
-
-/*
-
-//I2CScanner
-#include <Arduino.h>
-#include <Wire.h>
-
-
-void setup()
-{
-  Wire.begin(8,10); //SDA,SCL
-
+  delay(5000);
   Serial.begin(115200);
-  while (!Serial);             // Leonardo: wait for serial monitor
-  Serial.println("\nI2C Scanner");
-}
+  Serial.println("Test");
 
+  Wire.begin();
+  Serial.println("\nTCAScanner ready!");
+  
+  for (uint8_t t=0; t<8; t++) {
+    tcaselect(t);
+    Serial.print("TCA Port #"); Serial.println(t);
 
-void loop()
-{
-  byte error, address;
-  int nDevices;
+    for (uint8_t addr = 0; addr<=127; addr++) {
+      if (addr == TCAADDR) continue;
 
-  Serial.println("Scanning...");
-
-  nDevices = 0;
-  for(address = 1; address < 127; address++ ){
-    // The i2c_scanner uses the return value of
-    // the Write.endTransmisstion to see if
-    // a device did acknowledge to the address.
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-    Serial.printf("0X%X, ", address, error);
-
-    if (error == 0){
-      Serial.print("\nI2C device found at address 0x");
-      if (address<16) 
-        Serial.print("0");
-      Serial.print(address,HEX);
-      Serial.println("  !");
-
-      nDevices++;
+      Wire.beginTransmission(addr);
+      if (!Wire.endTransmission()) {
+        Serial.print("Found I2C 0x");  Serial.println(addr,HEX);
+      }
     }
-    else if (error==4){
-      Serial.print("\nUnknown error at address 0x");
-      if (address<16) 
-        Serial.print("0");
-      Serial.println(address,HEX);
-    }    
+  }
+  Serial.println("\ndone");
+  Serial.println("alles effe testen"); Serial.println("");
+  
+  /* Initialise the 1st sensor */
+  tcaselect(7);
+  if(!sensor.begin())
+  {
+    /* There was a problem detecting the HMC5883 ... check your connections */
+    Serial.println("Ooops, no PPG detected ... Check your wiring!");
+    while(1);
+  }
+  
+  /* Initialise the 2nd sensor */
+  tcaselect(5);
+  bool avail = BH1750.begin(BH1750_ADDRESS);// init the sensor with address pin connetcted to ground
+                                              // result (bool) wil be be "false" if no sensor found
+  if (!avail) {
+    Serial.println("No BH1750 sensor found!");
+    while (true) {}; 
   }
 
-  if (nDevices == 0)
-    Serial.println("\nNo I2C devices found\n");
-  else
-    Serial.println("done\n");
+  tcaselect(6);
+  unsigned status;
+  status = bmp.begin(BMP280_ADDRESS);
+  if (!status) {
+    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
+                      "try a different address!"));
+    Serial.print("SensorID was: 0x"); Serial.println(bmp.sensorID(),16);
+    Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
+    Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
+    Serial.print("        ID of 0x60 represents a BME 280.\n");
+    Serial.print("        ID of 0x61 represents a BME 680.\n");
+    while (1) delay(10);
+  }
 
-  delay(5000);           // wait 5 seconds for next scan
+  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,    
+                  Adafruit_BMP280::SAMPLING_X2,     
+                  Adafruit_BMP280::SAMPLING_X16,    
+                  Adafruit_BMP280::FILTER_X16,      
+                  Adafruit_BMP280::STANDBY_MS_500); 
+  
+
+  Serial.println("Aight lets cook");
 }
 
-*/
+void loop(){
+    tcaselect(7);
+    auto sample = sensor.readSample(1000);
+    float ir_value = sample.ir;
+    float red_value = sample.red;
+    Serial.print(ir_value);
+    Serial.print(",");
+    Serial.print(red_value);
+    Serial.println("");
+
+    
+    tcaselect(6);
+    float temp=bmp.readTemperature();
+    float pressure=bmp.readPressure();
+    float altitude=bmp.readAltitude(1013.25);
+
+    tcaselect(5);
+    BH1750.start();
+    float lux=BH1750.getLux();
+
+    delay(100);
+}
