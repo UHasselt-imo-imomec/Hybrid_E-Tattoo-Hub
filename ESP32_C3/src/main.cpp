@@ -3,7 +3,7 @@
 ESP32AnalogRead adc;
 
 int analogPin = 0;
-int Vin = 3.3;
+float Vin = 3.3;
 float Vout = 0;
 float R1 = 0;
 float R2 = 220;
@@ -17,13 +17,10 @@ void setup(){
 
 void loop(){
   Vout = adc.readVoltage();
-  buffer = ((Vin/Vout) - 1);
-  R1 = R2*buffer;
+  R1 = R2 * ((Vin/Vout) - 1);
   Serial.print("Vout: ");
   Serial.println(Vout, 4);
-  Serial.print("buffer: ");
-  Serial.println(buffer, 4);
   Serial.print("R1: ");
-  Serial.println(R1, 1);
-  delay(100);
+  Serial.println(R1);
+  delay(1000);
 }
