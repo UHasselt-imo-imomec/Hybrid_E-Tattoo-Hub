@@ -160,7 +160,7 @@ void setup(){
                   Adafruit_BMP280::FILTER_X16,      
                   Adafruit_BMP280::STANDBY_MS_500); 
   
-  for (int thisReading = 0; thisReading < numReadings; thisReading++) { // initialize all the readings to 0:
+  for (int thisReading = 0; thisReading < numReadings; thisReading++) { // initialize all the readings of analog sensor to 0:
     readings[thisReading] = 0;
   }
 
