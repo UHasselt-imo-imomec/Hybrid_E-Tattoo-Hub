@@ -1,0 +1,70 @@
+{
+    "frameEnd": ",\\r\\n",
+    "frameStart": ",",
+    "groups": [
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Hiel",
+                    "units": "Counts",
+                    "value": "%1",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Middenvoet",
+                    "units": "Counts",
+                    "value": "%2",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Voorvoet",
+                    "units": "Counts",
+                    "value": "%3",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Grote teen",
+                    "units": "Counts",
+                    "value": "%4",
+                    "widget": ""
+                }
+            ],
+            "title": "Smart Sock",
+            "widget": "multiplot"
+        }
+    ],
+    "separator": ",",
+    "title": "SensorSocks"
+}
