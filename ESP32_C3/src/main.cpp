@@ -19,9 +19,9 @@ hp_BH1750 BH1750;       //  create the sensor
 #define PPG_SENSOR_READOUT_TIME_MS 10
 #define TEMP_HUM_SENSOR_READOUT_TIME_MS 1000
 #define LIGHT_SENSOR_READOUT_TIME_MS 5000
-unsigned long last_PPG_sensor_readout = 0;
-unsigned long last_TEMP_HUM_sensor_readout = 0;
-unsigned long last_LIGHT_sensor_readout = 0;
+unsigned long last_PPG_sensor_readout = 0;  //Time in ms
+unsigned long last_TEMP_HUM_sensor_readout = 0;  //Time in ms
+unsigned long last_LIGHT_sensor_readout = 0;  //Time in ms
 bool readPPG = false;
 bool readTEMP_HUM = false;
 bool readLIGHT = false;
@@ -161,9 +161,9 @@ void loop(){
     tcaselect(PPG_SENSOR);
     auto sample = PPG_sensor.readSample(1000); // De 1000 is de timeout in ms, niet het aantal samples!
     if (sample.valid){  //Check if the sample is valid, then proceed
-      float ir_value = sample.ir;
-      float red_value = sample.red;
-      Serial.printf("IR: %f, Red: %f\n", ir_value, red_value);
+      uint32_t ir_value = sample.ir;  //Check datatype!
+      uint32_t red_value = sample.red; //Check datatype!
+      Serial.printf("IR: %d, Red: %d\n", ir_value, red_value);
     }
     else{
       Serial.println("Sample not valid, probably the timeout is too short!");
