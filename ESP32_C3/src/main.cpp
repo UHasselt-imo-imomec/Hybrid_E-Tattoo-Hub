@@ -189,7 +189,13 @@ void loop(){
     if (sample.valid){  //Check if the sample is valid, then proceed
       float ir_value = sample.ir;
       float red_value = sample.red;
-      Serial.printf("IR: %f, Red: %f\n", ir_value, red_value);
+      //Serial.printf("IR: %f, Red: %f\n", ir_value, red_value);
+      Serial.print(current_time);
+      Serial.print(",");
+      Serial.print(ir_value);
+      Serial.print(",");
+      Serial.print(red_value);
+      Serial.println("");
     }
     else{
       Serial.println("Sample not valid, probably the timeout is too short!");
@@ -203,7 +209,7 @@ void loop(){
     float pressure=bmp.readPressure();
     float altitude=bmp.readAltitude(1013.25);
 
-    Serial.printf("Temperature: %f, Pressure: %f, Altitude: %f\n", temp, pressure, altitude);
+    //Serial.printf("Temperature: %f, Pressure: %f, Altitude: %f\n", temp, pressure, altitude);
   }
 
   if(readLIGHT){
@@ -211,7 +217,7 @@ void loop(){
     tcaselect(LIGHT_SENSOR);
     BH1750.start();
     float lux=BH1750.getLux();
-    Serial.printf("Light: %f\n", lux);
+    //Serial.printf("Light: %f\n", lux);
   }
 
   if(readAnalog_TEMP){
@@ -230,10 +236,9 @@ void loop(){
       // ...wrap around to the beginning:
       readIndex = 0;
     }
-
     // calculate the average:
     average_Vout = total / numReadings;
     R1 = R2 * ((Vin/average_Vout) - 1);
-    Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
+    //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
   }
 }
