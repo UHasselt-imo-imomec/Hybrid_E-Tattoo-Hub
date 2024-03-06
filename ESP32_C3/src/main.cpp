@@ -5,36 +5,6 @@
 #include <hp_BH1750.h> 
 #include "filters.h"
 #include <ESP32AnalogRead.h>
-#include <InfluxDbClient.h>
-#include <InfluxDbCloud.h>
-#include "secrets.h"
-
-#if defined(ESP32)
-#include <WiFiMulti.h>
-WiFiMulti wifiMulti;
-#define DEVICE "ESP32"
-#elif defined(ESP8266)
-#include <ESP8266WiFiMulti.h>
-ESP8266WiFiMulti wifiMulti; //Demo
-#define DEVICE "ESP8266"
-#endif
-
-// WiFi AP SSID
-#define WIFI_SSID SSID
-// WiFi password
-#define WIFI_PASSWORD Password
-#define INFLUXDB_URL url
-#define INFLUXDB_TOKEN TOKEN
-#define INFLUXDB_ORG ORG
-#define INFLUXDB_BUCKET BUCKET
-// Time zone info
-#define TZ_INFO "UTC-1"
-
-// Declare InfluxDB client instance with preconfigured InfluxCloud certificate
-InfluxDBClient client(INFLUXDB_URL, INFLUXDB_ORG, INFLUXDB_BUCKET, INFLUXDB_TOKEN, InfluxDbCloud2CACert);
-
-// Declare Data point
-Point X("Sensoren_data");
 
 // Define I2C Addresses
 #define TCAADDR 0x70
@@ -43,7 +13,6 @@ Point X("Sensoren_data");
 #define MAX30100_ADDRESS 0x57
 Adafruit_BMP280 bmp; // I2C
 hp_BH1750 BH1750;       //  create the sensor
-
 
 
 //Timings for sensor readout:
@@ -129,46 +98,9 @@ void tcaselect(uint8_t i) {
 void setup(){
     
   delay(5000);    //Delay to let Serial Monitor catch up (Because of CDCBoot)
-
   adc.attach(analogPin);
   Serial.begin(115200);
   Serial.println("Initializing");
-
-  WiFi.setTxPower(WIFI_POWER_8_5dBm);
-  WiFi.mode(WIFI_STA);
-  wifiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
-  
-  Serial.print("Connecting to wifi");
-  while (wifiMulti.run() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(100);
-  }
-  Serial.println();
-  
-  timeSync(TZ_INFO, "pool.ntp.org", "time.nis.gov");
-
-  if (client.validateConnection()) {
-    Serial.print("Connected to InfluxDB_1: ");
-    Serial.println(client.getServerUrl());
-  } else {
-    Serial.print("InfluxDB connection failed: ");
-    Serial.println(client.getLastErrorMessage());
-  }
-  Serial.println("\tAvailable RAM memory: " + String(esp_get_free_heap_size()) + " bytes");
-  
-  // Set write options for batching and precision
-  client.setWriteOptions(
-      WriteOptions()
-          .writePrecision(WritePrecision::MS)
-          .batchSize(10)
-          .bufferSize(1000)
-          .flushInterval(10)
-  );
-
-  // Set HTTP options for the client
-  client.setHTTPOptions(
-      HTTPOptions().connectionReuse(true)
-  );  
 
   Wire.begin();
   Serial.println("\nTCAScanner ready!");  //Scan all TCA ports for I2C devices, and report back immediately upon finding one.
@@ -250,42 +182,43 @@ void loop(){
     readAnalog_TEMP = true;
   }
 
+  uint32_t ir_value;
+  uint32_t red_value;
+  float temp;
+  float altitude;
+  float pressure;
+  float lux;
+
   if(readPPG){
     readPPG = false;
     tcaselect(PPG_SENSOR);
     auto sample = PPG_sensor.readSample(1000); // De 1000 is de timeout in ms, niet het aantal samples!
     if (sample.valid){  //Check if the sample is valid, then proceed
-      float ir_value = sample.ir;
-      float red_value = sample.red;
-      //Serial.printf("IR: %f, Red: %f\n", ir_value, red_value);
-      X.addField("ir_value", ir_value);
-      X.addField("red_value", red_value);
+      ir_value = sample.ir;
+      red_value = sample.red;
+      //Serial.printf("IR: %u, Red: %u\n", ir_value, red_value);
     }
     else{
-      Serial.println("Sample not valid, probably the timeout is too short!");
+      //Serial.println("Sample not valid, probably the timeout is too short!");
     }
   }
     
   if(readTEMP_HUM){  
     readTEMP_HUM = false;
     tcaselect(TEMP_HUM_SENSOR);
-    float temp=bmp.readTemperature();
-    float pressure=bmp.readPressure();
-    float altitude=bmp.readAltitude(1013.25);
+    temp=bmp.readTemperature();
+    pressure=bmp.readPressure();
+    altitude=bmp.readAltitude(1013.25);
 
     //Serial.printf("Temperature: %f, Pressure: %f, Altitude: %f\n", temp, pressure, altitude);
-    X.addField("Temp", temp);
-    X.addField("Pressure", pressure);
-    X.addField("Altitude", altitude);
   }
 
   if(readLIGHT){
     readLIGHT = false;
     tcaselect(LIGHT_SENSOR);
     BH1750.start();
-    float lux=BH1750.getLux();
+    lux=BH1750.getLux();
     //Serial.printf("Light: %f\n", lux);
-    X.addField("Lux", lux);
   }
 
   if(readAnalog_TEMP){
@@ -304,21 +237,12 @@ void loop(){
       // ...wrap around to the beginning:
       readIndex = 0;
     }
+
     // calculate the average:
     average_Vout = total / numReadings;
     R1 = R2 * ((Vin/average_Vout) - 1);
     //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
-    X.addField("temp weerstand", R1);
   }
-
-    // Write the point to InfluxDB
-  if (client.writePoint(X)) {
-    //Serial.println("Data sent to InfluxDB successfully!");
-    Serial.println("\tAvailable RAM memory: " + String(esp_get_free_heap_size()) + " bytes");
-  } else {
-    Serial.print("InfluxDB write failed: ");
-    Serial.println(client.getLastErrorMessage());
-  }
-  // Clear previous data from the point
-  X.clearFields();
+  Serial.print("/*" + String(millis()) + "," + ir_value + "," + red_value + "," + temp + "," + pressure + "," + altitude + "," + lux + "," + R1 + "*/");
+  Serial.println();  // <- Print an end of line, fixed the issue for me.
 }
