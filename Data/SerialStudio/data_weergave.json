@@ -1,0 +1,150 @@
+{
+    "frameEnd": "",
+    "frameStart": "",
+    "groups": [
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": false,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "runtime",
+                    "units": "",
+                    "value": "%1",
+                    "widget": ""
+                }
+            ],
+            "title": "Run time",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 128,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "IR-VALUE",
+                    "units": "",
+                    "value": "%2",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 128,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "RED-VALUE",
+                    "units": "",
+                    "value": "%3",
+                    "widget": ""
+                }
+            ],
+            "title": "ppg sensor data",
+            "widget": "multiplot"
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": false,
+                    "led": false,
+                    "log": false,
+                    "max": 60,
+                    "min": -40,
+                    "title": "Temp",
+                    "units": "",
+                    "value": "%4",
+                    "widget": "gauge"
+                },
+                {
+                    "alarm": 150000,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": false,
+                    "led": false,
+                    "log": false,
+                    "max": 150000,
+                    "min": 50000,
+                    "title": "Pressure",
+                    "units": "",
+                    "value": "%5",
+                    "widget": "gauge"
+                },
+                {
+                    "alarm": 100,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": false,
+                    "led": false,
+                    "log": false,
+                    "max": 100,
+                    "min": -100,
+                    "title": "Altitude",
+                    "units": "",
+                    "value": "%6",
+                    "widget": "gauge"
+                }
+            ],
+            "title": "BMP280",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 1000,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": false,
+                    "led": false,
+                    "log": false,
+                    "max": 1000,
+                    "min": 0,
+                    "title": "Lux",
+                    "units": "",
+                    "value": "%7",
+                    "widget": "gauge"
+                }
+            ],
+            "title": "BH1750",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 140,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 140,
+                    "min": 124,
+                    "title": "Resistance",
+                    "units": "",
+                    "value": "%8",
+                    "widget": ""
+                }
+            ],
+            "title": "Analog temp sensor",
+            "widget": "multiplot"
+        }
+    ],
+    "separator": ",",
+    "title": "%1"
+}
