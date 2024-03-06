@@ -6,7 +6,7 @@
 #include "filters.h"
 
 
-// Define I2C Addresses
+// Define I2C Addresses 
 #define TCAADDR 0x70
 #define BMP280_ADDRESS 0x76
 #define BH1750_ADDRESS 0x23
@@ -155,6 +155,7 @@ void loop(){
   if (current_time - last_LIGHT_sensor_readout > LIGHT_SENSOR_READOUT_TIME_MS){
     readLIGHT = true;
   }
+
 
   if(readPPG){
     readPPG = false;
