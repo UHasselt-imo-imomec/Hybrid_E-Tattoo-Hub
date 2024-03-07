@@ -35,7 +35,7 @@ bool readAnalog_TEMP = false;
 // more the readings will be smoothed, but the slower the output will respond to
 // the input.
 const int numReadings = 10;
-int analogPin = 0;
+int analogPin = A3;
 int readIndex = 0;            // the index of the current reading
 float readings[numReadings];  // the readings from the analog input
 float total = 0;              // the running total
