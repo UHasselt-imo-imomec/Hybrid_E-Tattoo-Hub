@@ -1,7 +1,7 @@
 #pragma once
 #include <Arduino.h>
 #include "esp_adc_cal.h"
-#define V_REF 1100  // ADC reference voltage
+//#define V_REF 1100  // ADC reference voltage
 
 
 class ESP32AnalogRead {
@@ -17,6 +17,5 @@ public :
 	~ESP32AnalogRead(){}
 	void attach(int pin);
 	float readVoltage();
-	uint32_t readMiliVolts();
-	uint16_t readRaw();
+	int readMiliVolts();
 };
