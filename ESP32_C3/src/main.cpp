@@ -20,17 +20,20 @@ hp_BH1750 BH1750;       //  create the sensor
 #define TEMP_HUM_SENSOR_READOUT_TIME_MS 1000
 #define ANALOG_TEMP_SENSOR_1_READOUT_TIME_MS 100
 #define ANALOG_TEMP_SENSOR_2_READOUT_TIME_MS 100
+#define ANALOG_TEMP_SENSOR_3_READOUT_TIME_MS 100
 #define LIGHT_SENSOR_READOUT_TIME_MS 5000
 unsigned long last_PPG_sensor_readout = 0;
 unsigned long last_TEMP_HUM_sensor_readout = 0;
 unsigned long last_LIGHT_sensor_readout = 0;
 unsigned long last_ANALOG_TEMP_sensor_1_readout = 0;
 unsigned long last_ANALOG_TEMP_sensor_2_readout = 0;
+unsigned long last_ANALOG_TEMP_sensor_3_readout = 0;
 bool readPPG = false;
 bool readTEMP_HUM = false;
 bool readLIGHT = false;
 bool readAnalog_TEMP_1 = false;
 bool readAnalog_TEMP_2 = false;
+bool readAnalog_TEMP_3 = false;
 
 
 // analoge sensor
@@ -49,13 +52,22 @@ float R2 = 220;
 ESP32AnalogRead adc1;
 
 const int numReadings_sensor_2 = 100;
-int analogPin_sensor_2 = 5;
+int analogPin_sensor_2 = 3;
 int readIndex_sensor_2 = 0;            // the index of the current reading
 float readings_sensor_2[numReadings_sensor_2];  // the readings from the analog input
 float total_sensor_2 = 0;              // the running total
 float average_Vout_sensor_2 = 0;       // the average voltage
 float R_temp_sensor_2 = 0;
 ESP32AnalogRead adc2;
+
+const int numReadings_sensor_3 = 100;
+int analogPin_sensor_3 = 5;
+int readIndex_sensor_3 = 0;            // the index of the current reading
+float readings_sensor_3[numReadings_sensor_3];  // the readings from the analog input
+float total_sensor_3 = 0;              // the running total
+float average_Vout_sensor_3 = 0;       // the average voltage
+float R_temp_sensor_3 = 0;
+ESP32AnalogRead adc3;
 // Predefined sensor channels (MUX channel#)
 enum sensorchannels {PPG_SENSOR = 7, TEMP_HUM_SENSOR = 6, LIGHT_SENSOR = 5};
 
@@ -111,6 +123,7 @@ void setup(){
   delay(5000);    //Delay to let Serial Monitor catch up (Because of CDCBoot)
   adc1.attach(analogPin_sensor_1);
   adc2.attach(analogPin_sensor_2);
+  adc3.attach(analogPin_sensor_3);
   Serial.begin(115200);
   Serial.println("Initializing");
 
@@ -178,7 +191,9 @@ void setup(){
   for (int thisReading = 0; thisReading < numReadings_sensor_2; thisReading++) { // initialize all the readings of analog sensor to 0:
     readings_sensor_2[thisReading] = 0;
   }
-
+  for (int thisReading = 0; thisReading < numReadings_sensor_3; thisReading++) { // initialize all the readings of analog sensor to 0:
+    readings_sensor_3[thisReading] = 0;
+  }
   Serial.println("Aight lets cook");
 }
 
@@ -198,6 +213,10 @@ void loop(){
   }
   if (current_time - last_ANALOG_TEMP_sensor_2_readout > ANALOG_TEMP_SENSOR_2_READOUT_TIME_MS){
     readAnalog_TEMP_2 = true;
+  }  
+
+  if (current_time - last_ANALOG_TEMP_sensor_3_readout > ANALOG_TEMP_SENSOR_3_READOUT_TIME_MS){
+    readAnalog_TEMP_3 = true;
   }  
 
   uint32_t ir_value;
@@ -286,6 +305,31 @@ void loop(){
     //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
 
   }
-  Serial.print("/*" + String(millis()) + "," + ir_value + "," + red_value + "," + temp + "," + pressure + "," + altitude + "," + lux + "," + R_temp_sensor_1 + "," + R_temp_sensor_2 + "*/");
+
+  if(readAnalog_TEMP_3){
+    readAnalog_TEMP_3 = false;
+        // subtract the last reading:
+    total_sensor_3 = total_sensor_3 - readings_sensor_3[readIndex_sensor_3];
+    // read from the sensor:
+    readings_sensor_3[readIndex_sensor_3] = adc3.readVoltage();
+    // add the reading to the total:
+    total_sensor_3 = total_sensor_3 + readings_sensor_3[readIndex_sensor_3];
+    // advance to the next position in the array:
+    readIndex_sensor_3 = readIndex_sensor_3 + 1;
+
+    // if we're at the end of the array...
+    if (readIndex_sensor_3 >= numReadings_sensor_3) {
+      // ...wrap around to the beginning:
+      readIndex_sensor_3 = 0;
+    }
+
+    // calculate the average:
+    average_Vout_sensor_3 = total_sensor_3 / numReadings_sensor_3;
+    R_temp_sensor_3 = R2 / ((Vin/average_Vout_sensor_3) - 1);
+    //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
+    //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
+
+  }
+  Serial.print("/*" + String(millis()) + "," + ir_value + "," + red_value + "," + temp + "," + pressure + "," + altitude + "," + lux + "," + R_temp_sensor_1 + "," + R_temp_sensor_2 + "," + R_temp_sensor_3 + "*/");
   Serial.println();  // <- Print an end of line, fixed the issue for me.
 }
