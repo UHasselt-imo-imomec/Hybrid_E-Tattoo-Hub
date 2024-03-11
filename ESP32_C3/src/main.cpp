@@ -49,7 +49,7 @@ float R2 = 220;
 ESP32AnalogRead adc1;
 
 const int numReadings_sensor_2 = 100;
-int analogPin_sensor_2 = 3;
+int analogPin_sensor_2 = 5;
 int readIndex_sensor_2 = 0;            // the index of the current reading
 float readings_sensor_2[numReadings_sensor_2];  // the readings from the analog input
 float total_sensor_2 = 0;              // the running total
@@ -283,6 +283,8 @@ void loop(){
     average_Vout_sensor_2 = total_sensor_2 / numReadings_sensor_2;
     R_temp_sensor_2 = R2 / ((Vin/average_Vout_sensor_2) - 1);
     //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
+    //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
+
   }
   Serial.print("/*" + String(millis()) + "," + ir_value + "," + red_value + "," + temp + "," + pressure + "," + altitude + "," + lux + "," + R_temp_sensor_1 + "," + R_temp_sensor_2 + "*/");
   Serial.println();  // <- Print an end of line, fixed the issue for me.
