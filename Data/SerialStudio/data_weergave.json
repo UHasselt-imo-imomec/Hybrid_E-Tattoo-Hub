@@ -127,22 +127,50 @@
         {
             "datasets": [
                 {
-                    "alarm": 140,
+                    "alarm": 1500,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 7.9,
+                    "min": 7,
+                    "title": "TempSens_1",
+                    "units": "",
+                    "value": "%8",
+                    "widget": ""
+                },
+                {
+                    "alarm": 24,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 23,
+                    "min": 19,
+                    "title": "TempSens_2",
+                    "units": "",
+                    "value": "%9",
+                    "widget": ""
+                },
+                {
+                    "alarm": 133,
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
                     "led": false,
                     "log": false,
                     "max": 140,
-                    "min": 124,
-                    "title": "Resistance",
+                    "min": 125,
+                    "title": "TempSens_3",
                     "units": "",
-                    "value": "%8",
+                    "value": "%10",
                     "widget": ""
                 }
             ],
             "title": "Analog temp sensor",
-            "widget": "multiplot"
+            "widget": ""
         }
     ],
     "separator": ",",
