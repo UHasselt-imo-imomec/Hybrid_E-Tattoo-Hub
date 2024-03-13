@@ -23,7 +23,7 @@ ESP8266WiFiMulti wifiMulti; //Demo
 #define WIFI_SSID SSID
 // WiFi password
 #define WIFI_PASSWORD Password
-#define INFLUXDB_URL url
+#define INFLUXDB_URL url1
 #define INFLUXDB_TOKEN TOKEN
 #define INFLUXDB_ORG ORG
 #define INFLUXDB_BUCKET BUCKET
@@ -49,35 +49,49 @@ hp_BH1750 BH1750;       //  create the sensor
 //Timings for sensor readout:
 #define PPG_SENSOR_READOUT_TIME_MS 10
 #define TEMP_HUM_SENSOR_READOUT_TIME_MS 1000
-#define ANALOG_TEMP_SENSOR_READOUT_TIME_MS 1000
+#define ANALOG_TEMP_SENSOR_1_READOUT_TIME_MS 100
+#define ANALOG_TEMP_SENSOR_2_READOUT_TIME_MS 100
 #define LIGHT_SENSOR_READOUT_TIME_MS 5000
 unsigned long last_PPG_sensor_readout = 0;
 unsigned long last_TEMP_HUM_sensor_readout = 0;
 unsigned long last_LIGHT_sensor_readout = 0;
-unsigned long last_ANALOG_TEMP_sensor_readout = 0;
+unsigned long last_ANALOG_TEMP_sensor_1_readout = 0;
+unsigned long last_ANALOG_TEMP_sensor_2_readout = 0;
 bool readPPG = false;
 bool readTEMP_HUM = false;
 bool readLIGHT = false;
-bool readAnalog_TEMP = false;
+bool readAnalog_TEMP_1 = false;
+bool readAnalog_TEMP_2 = false;
+
 
 
 // analoge sensor
 // Define the number of samples to keep track of. The higher the number, the
 // more the readings will be smoothed, but the slower the output will respond to
 // the input.
-const int numReadings = 10;
-int analogPin = 0;
-int readIndex = 0;            // the index of the current reading
-float readings[numReadings];  // the readings from the analog input
-float total = 0;              // the running total
-float average_Vout = 0;       // the average voltage
-float Vin = 3.3;
-float R1 = 0;
-float R2 = 220.5;
-ESP32AnalogRead adc;
+const int numReadings_sensor_1 = 100;
+int analogPin_sensor_1 = 2;
+int readIndex_sensor_1 = 0;            // the index of the current reading
+float readings_sensor_1[numReadings_sensor_1];  // the readings from the analog input
+float total_sensor_1 = 0;              // the running total
+float average_Vout_sensor_1 = 0;       // the average voltage
+float Vin_sensor_1 = 3.3;
+float R_temp_sensor_1 = 0;
+float R2 = 220;
+ESP32AnalogRead adc1;
+
+const int numReadings_sensor_2 = 100;
+int analogPin_sensor_2 = 3;
+int readIndex_sensor_2 = 0;            // the index of the current reading
+float readings_sensor_2[numReadings_sensor_2];  // the readings from the analog input
+float total_sensor_2 = 0;              // the running total
+float average_Vout_sensor_2 = 0;       // the average voltage
+float Vin_sensor_2 = 3.3;
+float R_temp_sensor_2 = 0;
+ESP32AnalogRead adc2;
 
 // Predefined sensor channels (MUX channel#)
-enum sensorchannels {PPG_SENSOR = 7, TEMP_HUM_SENSOR = 6, LIGHT_SENSOR = 5};
+enum sensorchannels {PPG_SENSOR = 1, TEMP_HUM_SENSOR = 3, LIGHT_SENSOR = 7};
 
 // PPG_sensor (adjust to your sensor type)
 MAX30105 PPG_sensor;    //Controleren, ik ben niet zeker of dit de juiste sensor is!
@@ -130,13 +144,15 @@ void setup(){
     
   delay(5000);    //Delay to let Serial Monitor catch up (Because of CDCBoot)
 
-  adc.attach(analogPin);
+  adc1.attach(analogPin_sensor_1);
+  adc2.attach(analogPin_sensor_2);
+
   Serial.begin(115200);
   Serial.println("Initializing");
-
+  
   WiFi.setTxPower(WIFI_POWER_8_5dBm);
   WiFi.mode(WIFI_STA);
-  wifiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
+  wifiMulti.addAP(SSID1, Password1);
   
   Serial.print("Connecting to wifi");
   while (wifiMulti.run() != WL_CONNECTED) {
@@ -169,11 +185,11 @@ void setup(){
   client.setHTTPOptions(
       HTTPOptions().connectionReuse(true)
   );  
-
+  
   Wire.begin();
   Serial.println("\nTCAScanner ready!");  //Scan all TCA ports for I2C devices, and report back immediately upon finding one.
 
-  for (uint8_t t=0; t<8; t++) {
+  for (uint8_t t=2; t<3; t++) {
     tcaselect(t);
     Serial.print("TCA Port #"); Serial.println(t);
 
@@ -186,6 +202,7 @@ void setup(){
       }
     }
   }
+  
   Serial.println("\ndone");
   Serial.println("alles effe testen"); Serial.println("");
   
@@ -228,14 +245,18 @@ void setup(){
                   Adafruit_BMP280::FILTER_X16,      
                   Adafruit_BMP280::STANDBY_MS_500); 
   
-  for (int thisReading = 0; thisReading < numReadings; thisReading++) { // initialize all the readings of analog sensor to 0:
-    readings[thisReading] = 0;
+  for (int thisReading = 0; thisReading < numReadings_sensor_1; thisReading++) { // initialize all the readings of analog sensor to 0:
+    readings_sensor_1[thisReading] = 0;
+  }
+  for (int thisReading = 0; thisReading < numReadings_sensor_2; thisReading++) { // initialize all the readings of analog sensor to 0:
+    readings_sensor_2[thisReading] = 0;
   }
 
   Serial.println("Aight lets cook");
 }
 
 void loop(){
+  delay(10000);
   unsigned long current_time = millis();  //Check if sensors have to be read
   if (current_time - last_PPG_sensor_readout > PPG_SENSOR_READOUT_TIME_MS){
     readPPG = true;
@@ -246,9 +267,12 @@ void loop(){
   if (current_time - last_LIGHT_sensor_readout > LIGHT_SENSOR_READOUT_TIME_MS){
     readLIGHT = true;
   }
-  if (current_time - last_ANALOG_TEMP_sensor_readout > ANALOG_TEMP_SENSOR_READOUT_TIME_MS){
-    readAnalog_TEMP = true;
+  if (current_time - last_ANALOG_TEMP_sensor_1_readout > ANALOG_TEMP_SENSOR_1_READOUT_TIME_MS){
+    readAnalog_TEMP_1 = true;
   }
+  if (current_time - last_ANALOG_TEMP_sensor_2_readout > ANALOG_TEMP_SENSOR_2_READOUT_TIME_MS){
+    readAnalog_TEMP_2 = true;
+  }  
 
   if(readPPG){
     readPPG = false;
@@ -288,28 +312,56 @@ void loop(){
     X.addField("Lux", lux);
   }
 
-  if(readAnalog_TEMP){
-    readAnalog_TEMP = false;
+
+  if(readAnalog_TEMP_1){
+    readAnalog_TEMP_1 = false;
         // subtract the last reading:
-    total = total - readings[readIndex];
+    total_sensor_1 = total_sensor_1 - readings_sensor_1[readIndex_sensor_1];
     // read from the sensor:
-    readings[readIndex] = adc.readVoltage();
+    readings_sensor_1[readIndex_sensor_1] = adc1.readVoltage();
     // add the reading to the total:
-    total = total + readings[readIndex];
+    total_sensor_1 = total_sensor_1 + readings_sensor_1[readIndex_sensor_1];
     // advance to the next position in the array:
-    readIndex = readIndex + 1;
+    readIndex_sensor_1 = readIndex_sensor_1 + 1;
 
     // if we're at the end of the array...
-    if (readIndex >= numReadings) {
+    if (readIndex_sensor_1 >= numReadings_sensor_1) {
       // ...wrap around to the beginning:
-      readIndex = 0;
+      readIndex_sensor_1 = 0;
     }
+
     // calculate the average:
-    average_Vout = total / numReadings;
-    R1 = R2 * ((Vin/average_Vout) - 1);
+    average_Vout_sensor_1 = total_sensor_1 / numReadings_sensor_1;
+    R_temp_sensor_1 = R2 / ((Vin_sensor_1/average_Vout_sensor_1) - 1);
     //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
-    X.addField("temp weerstand", R1);
+    X.addField("temp weerstand 1", R_temp_sensor_1);
   }
+
+  if(readAnalog_TEMP_2){
+    readAnalog_TEMP_2 = false;
+        // subtract the last reading:
+    total_sensor_2 = total_sensor_2 - readings_sensor_2[readIndex_sensor_2];
+    // read from the sensor:
+    readings_sensor_2[readIndex_sensor_2] = adc2.readVoltage();
+    // add the reading to the total:
+    total_sensor_2 = total_sensor_2 + readings_sensor_2[readIndex_sensor_2];
+    // advance to the next position in the array:
+    readIndex_sensor_2 = readIndex_sensor_2 + 1;
+
+    // if we're at the end of the array...
+    if (readIndex_sensor_2 >= numReadings_sensor_2) {
+      // ...wrap around to the beginning:
+      readIndex_sensor_2 = 0;
+    }
+
+    // calculate the average:
+    average_Vout_sensor_2 = total_sensor_2 / numReadings_sensor_2;
+    R_temp_sensor_2 = R2 / ((Vin_sensor_2/(average_Vout_sensor_2)) - 1);
+    //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
+    //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
+    X.addField("temp weerstand 2", R_temp_sensor_2);
+  }
+
 
     // Write the point to InfluxDB
   if (client.writePoint(X)) {
