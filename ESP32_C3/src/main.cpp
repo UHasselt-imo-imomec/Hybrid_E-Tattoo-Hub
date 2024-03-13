@@ -214,7 +214,7 @@ void loop(){
   }
   if (current_time - last_LIGHT_sensor_readout > LIGHT_SENSOR_READOUT_TIME_MS){
     readLIGHT = true;
-  // }
+  }
   if (current_time - last_ANALOG_TEMP_sensor_1_readout > ANALOG_TEMP_SENSOR_1_READOUT_TIME_MS){
     readAnalog_TEMP_1 = true;
   }
