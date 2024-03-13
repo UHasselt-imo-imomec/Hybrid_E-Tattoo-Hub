@@ -231,6 +231,7 @@ void loop(){
   float altitude;
   float pressure;
   float lux;
+  
   if(readPPG){
     readPPG = false;
     tcaselect(PPG_SENSOR);
@@ -244,6 +245,7 @@ void loop(){
       //Serial.println("Sample not valid, probably the timeout is too short!");
     }
   }
+
   if(readTEMP_HUM){  
     readTEMP_HUM = false;
     tcaselect(TEMP_HUM_SENSOR);
