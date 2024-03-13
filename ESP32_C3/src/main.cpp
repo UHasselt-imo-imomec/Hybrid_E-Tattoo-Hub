@@ -46,7 +46,7 @@ int readIndex_sensor_1 = 0;            // the index of the current reading
 float readings_sensor_1[numReadings_sensor_1];  // the readings from the analog input
 float total_sensor_1 = 0;              // the running total
 float average_Vout_sensor_1 = 0;       // the average voltage
-float Vin = 3.3;
+float Vin_sensor_1 = 3.3;
 float R_temp_sensor_1 = 0;
 float R2 = 220;
 ESP32AnalogRead adc1;
@@ -57,6 +57,7 @@ int readIndex_sensor_2 = 0;            // the index of the current reading
 float readings_sensor_2[numReadings_sensor_2];  // the readings from the analog input
 float total_sensor_2 = 0;              // the running total
 float average_Vout_sensor_2 = 0;       // the average voltage
+float Vin_sensor_2 = 3.3;
 float R_temp_sensor_2 = 0;
 ESP32AnalogRead adc2;
 
@@ -66,10 +67,11 @@ int readIndex_sensor_3 = 0;            // the index of the current reading
 float readings_sensor_3[numReadings_sensor_3];  // the readings from the analog input
 float total_sensor_3 = 0;              // the running total
 float average_Vout_sensor_3 = 0;       // the average voltage
+float Vin_sensor_3 = 3.3;
 float R_temp_sensor_3 = 0;
 ESP32AnalogRead adc3;
 // Predefined sensor channels (MUX channel#)
-enum sensorchannels {PPG_SENSOR = 7, TEMP_HUM_SENSOR = 6, LIGHT_SENSOR = 5};
+enum sensorchannels {PPG_SENSOR = 1, TEMP_HUM_SENSOR = 3, LIGHT_SENSOR = 7};
 
 // PPG_sensor (adjust to your sensor type)
 MAX30105 PPG_sensor;    //Controleren, ik ben niet zeker of dit de juiste sensor is!
@@ -122,8 +124,11 @@ void setup(){
     
   delay(5000);    //Delay to let Serial Monitor catch up (Because of CDCBoot)
   adc1.attach(analogPin_sensor_1);
+  //analogSetPinAttenuation(analogPin_sensor_1, ADC_2_5db);
   adc2.attach(analogPin_sensor_2);
+  //analogSetPinAttenuation(analogPin_sensor_2, ADC_0db);
   adc3.attach(analogPin_sensor_3);
+  //analogSetPinAttenuation(analogPin_sensor_3, ADC_0db);
   Serial.begin(115200);
   Serial.println("Initializing");
 
@@ -149,13 +154,13 @@ void setup(){
   /* Initialise the 1st PPG_sensor */ //--> Dit kan dynamisch gemaakt worden, maar ik zou hier niet te veel tijd aan besteden! 
   tcaselect(PPG_SENSOR);
   if(!PPG_sensor.begin())  {
-    /* There was a problem detecting the HMC5883 ... check your connections */
     Serial.println("Ooops, no PPG detected ... Check your wiring!");
     while(1) delay(10);
   }
 
   
   /* Initialise the 2nd sensor (Light sensor)*/
+  
   tcaselect(LIGHT_SENSOR);
   bool avail = BH1750.begin(BH1750_ADDRESS);// init the sensor with address pin connetcted to ground
                                               // result (bool) wil be be "false" if no sensor found
@@ -165,6 +170,7 @@ void setup(){
   }
 
   /* Initialise the 3rd sensor (Temp/Hum sensor)*/
+  
   tcaselect(TEMP_HUM_SENSOR);
   unsigned status;
   status = bmp.begin(BMP280_ADDRESS);
@@ -178,7 +184,8 @@ void setup(){
     Serial.print("        ID of 0x61 represents a BME 680.\n");
     while (1) delay(10);
   }
-
+  
+  
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,    
                   Adafruit_BMP280::SAMPLING_X2,     
                   Adafruit_BMP280::SAMPLING_X16,    
@@ -207,14 +214,13 @@ void loop(){
   }
   if (current_time - last_LIGHT_sensor_readout > LIGHT_SENSOR_READOUT_TIME_MS){
     readLIGHT = true;
-  }
+  // }
   if (current_time - last_ANALOG_TEMP_sensor_1_readout > ANALOG_TEMP_SENSOR_1_READOUT_TIME_MS){
     readAnalog_TEMP_1 = true;
   }
   if (current_time - last_ANALOG_TEMP_sensor_2_readout > ANALOG_TEMP_SENSOR_2_READOUT_TIME_MS){
     readAnalog_TEMP_2 = true;
   }  
-
   if (current_time - last_ANALOG_TEMP_sensor_3_readout > ANALOG_TEMP_SENSOR_3_READOUT_TIME_MS){
     readAnalog_TEMP_3 = true;
   }  
@@ -225,7 +231,6 @@ void loop(){
   float altitude;
   float pressure;
   float lux;
-
   if(readPPG){
     readPPG = false;
     tcaselect(PPG_SENSOR);
@@ -239,7 +244,6 @@ void loop(){
       //Serial.println("Sample not valid, probably the timeout is too short!");
     }
   }
-    
   if(readTEMP_HUM){  
     readTEMP_HUM = false;
     tcaselect(TEMP_HUM_SENSOR);
@@ -277,7 +281,7 @@ void loop(){
 
     // calculate the average:
     average_Vout_sensor_1 = total_sensor_1 / numReadings_sensor_1;
-    R_temp_sensor_1 = R2 / ((Vin/average_Vout_sensor_1) - 1);
+    R_temp_sensor_1 = R2 / ((Vin_sensor_1/average_Vout_sensor_1) - 1);
     //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
   }
 
@@ -300,7 +304,7 @@ void loop(){
 
     // calculate the average:
     average_Vout_sensor_2 = total_sensor_2 / numReadings_sensor_2;
-    R_temp_sensor_2 = R2 / ((Vin/average_Vout_sensor_2) - 1);
+    R_temp_sensor_2 = R2 / ((Vin_sensor_2/(average_Vout_sensor_2)) - 1);
     //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
     //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
 
@@ -325,7 +329,7 @@ void loop(){
 
     // calculate the average:
     average_Vout_sensor_3 = total_sensor_3 / numReadings_sensor_3;
-    R_temp_sensor_3 = R2 / ((Vin/average_Vout_sensor_3) - 1);
+    R_temp_sensor_3 = R2 / ((Vin_sensor_3/average_Vout_sensor_3) - 1);
     //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
     //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
 
