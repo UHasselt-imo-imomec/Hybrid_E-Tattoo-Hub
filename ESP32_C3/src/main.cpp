@@ -23,7 +23,7 @@ ESP8266WiFiMulti wifiMulti; //Demo
 #define WIFI_SSID SSID
 // WiFi password
 #define WIFI_PASSWORD Password
-#define INFLUXDB_URL url1
+#define INFLUXDB_URL url
 #define INFLUXDB_TOKEN TOKEN
 #define INFLUXDB_ORG ORG
 #define INFLUXDB_BUCKET BUCKET
@@ -152,7 +152,7 @@ void setup(){
   
   WiFi.setTxPower(WIFI_POWER_8_5dBm);
   WiFi.mode(WIFI_STA);
-  wifiMulti.addAP(SSID1, Password1);
+  wifiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
   
   Serial.print("Connecting to wifi");
   while (wifiMulti.run() != WL_CONNECTED) {
