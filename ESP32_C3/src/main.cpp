@@ -124,11 +124,9 @@ void setup(){
     
   delay(5000);    //Delay to let Serial Monitor catch up (Because of CDCBoot)
   adc1.attach(analogPin_sensor_1);
-  //analogSetPinAttenuation(analogPin_sensor_1, ADC_2_5db);
   adc2.attach(analogPin_sensor_2);
-  //analogSetPinAttenuation(analogPin_sensor_2, ADC_0db);
   adc3.attach(analogPin_sensor_3);
-  //analogSetPinAttenuation(analogPin_sensor_3, ADC_0db);
+
   Serial.begin(115200);
   Serial.println("Initializing");
 
