@@ -53,7 +53,7 @@ hp_BH1750 BH1750;       //  create the sensor
 #define ANALOG_TEMP_SENSOR_1_READOUT_TIME_MS 100
 #define ANALOG_TEMP_SENSOR_2_READOUT_TIME_MS 100
 #define LIGHT_SENSOR_READOUT_TIME_MS 5000
-#define LED_DELAY 100
+#define LED_DELAY 1000
 unsigned long last_PPG_sensor_readout = 0;
 unsigned long last_TEMP_HUM_sensor_readout = 0;
 unsigned long last_LIGHT_sensor_readout = 0;
