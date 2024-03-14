@@ -53,17 +53,19 @@ hp_BH1750 BH1750;       //  create the sensor
 #define ANALOG_TEMP_SENSOR_1_READOUT_TIME_MS 100
 #define ANALOG_TEMP_SENSOR_2_READOUT_TIME_MS 100
 #define LIGHT_SENSOR_READOUT_TIME_MS 5000
+#define LED_DELAY 100
 unsigned long last_PPG_sensor_readout = 0;
 unsigned long last_TEMP_HUM_sensor_readout = 0;
 unsigned long last_LIGHT_sensor_readout = 0;
 unsigned long last_ANALOG_TEMP_sensor_1_readout = 0;
 unsigned long last_ANALOG_TEMP_sensor_2_readout = 0;
+unsigned long last_blink = 0;
 bool readPPG = false;
 bool readTEMP_HUM = false;
 bool readLIGHT = false;
 bool readAnalog_TEMP_1 = false;
 bool readAnalog_TEMP_2 = false;
-
+bool readLed = false;
 
 
 // analoge sensor
@@ -156,16 +158,14 @@ void setup(){
 
   Serial.begin(115200);
   Serial.println("Initializing");
-  
-  WiFi.setTxPower(WIFI_POWER_8_5dBm);
   WiFi.mode(WIFI_STA);
   wifiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
-  
   Serial.print("Connecting to wifi");
   while (wifiMulti.run() != WL_CONNECTED) {
     Serial.print(".");
     delay(100);
   }
+  WiFi.setTxPower(WIFI_POWER_2dBm);
   Serial.println();
   if(WiFi.isConnected()){
     strip.setPixelColor(0, strip.Color(0,0,255));
@@ -190,11 +190,11 @@ void setup(){
   client.setWriteOptions(
       WriteOptions()
           .writePrecision(WritePrecision::MS)
-          .batchSize(10)
+          .batchSize(200)
           .bufferSize(1000)
-          .flushInterval(10)
+          .flushInterval(60)
   );
-
+  
   // Set HTTP options for the client
   client.setHTTPOptions(
       HTTPOptions().connectionReuse(true)
@@ -267,9 +267,11 @@ void setup(){
   }
 
   Serial.println("Aight lets cook");
+  Serial.println(WiFi.getTxPower());
 }
 
 void loop(){
+
   unsigned long current_time = millis();  //Check if sensors have to be read
   if (current_time - last_PPG_sensor_readout > PPG_SENSOR_READOUT_TIME_MS){
     readPPG = true;
@@ -286,6 +288,21 @@ void loop(){
   if (current_time - last_ANALOG_TEMP_sensor_2_readout > ANALOG_TEMP_SENSOR_2_READOUT_TIME_MS){
     readAnalog_TEMP_2 = true;
   }  
+
+  if (current_time - last_blink > LED_DELAY){
+    readLed = true;
+  }  
+
+  if(client.isBufferEmpty()){
+    strip.setPixelColor(0, strip.Color(255,0,255));
+    strip.show();
+  }
+
+  if(readLed){
+    readLed = false;
+    strip.clear();
+    strip.show();
+  }
 
   if(readPPG){
     readPPG = false;
@@ -379,16 +396,18 @@ void loop(){
     // Write the point to InfluxDB
   if (client.writePoint(X)) {
     //Serial.println("Data sent to InfluxDB successfully!");
-    Serial.println("\tAvailable RAM memory: " + String(esp_get_free_heap_size()) + " bytes");
+    //Serial.println("\tAvailable RAM memory: " + String(esp_get_free_heap_size()) + " bytes");
+    /*
     strip.setPixelColor(0, strip.Color(255,0,0));
     strip.show();
-    delay(100);
+    */
     strip.clear();
     strip.show();
   } else {
+    /*
     strip.setPixelColor(0, strip.Color(0,255,0));
     strip.show();
-    delay(100);
+    */
     strip.clear();
     strip.show();
     Serial.print("InfluxDB write failed: ");
