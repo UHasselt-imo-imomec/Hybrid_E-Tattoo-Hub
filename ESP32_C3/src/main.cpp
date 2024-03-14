@@ -8,6 +8,7 @@
 #include <InfluxDbClient.h>
 #include <InfluxDbCloud.h>
 #include "secrets.h"
+#include <Adafruit_NeoPixel.h>
 
 #if defined(ESP32)
 #include <WiFiMulti.h>
@@ -132,6 +133,8 @@ float last_diff = NAN;
 bool crossed = false;
 long crossed_time = 0;
 
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, 7, NEO_GRB + NEO_KHZ800);
+
 void tcaselect(uint8_t i) {
   if (i > 7) return;
  
@@ -141,7 +144,11 @@ void tcaselect(uint8_t i) {
 }
 
 void setup(){
-    
+  
+  strip.begin();
+  strip.setBrightness(50);
+  strip.show(); // Initialize all pixels to 'off'
+
   delay(5000);    //Delay to let Serial Monitor catch up (Because of CDCBoot)
 
   adc1.attach(analogPin_sensor_1);
@@ -160,7 +167,12 @@ void setup(){
     delay(100);
   }
   Serial.println();
-  
+  if(WiFi.isConnected()){
+    strip.setPixelColor(0, strip.Color(0,0,255));
+    strip.show();
+    delay(100);
+    strip.clear();
+  }
   timeSync(TZ_INFO, "pool.ntp.org", "time.nis.gov");
 
   if (client.validateConnection()) {
