@@ -170,11 +170,13 @@ void setup(){
   if(WiFi.isConnected()){
     strip.setPixelColor(0, strip.Color(0,0,255));
     strip.show();
-    delay(100);
+    delay(1000);
     strip.clear();
+    strip.show();
   }
   timeSync(TZ_INFO, "pool.ntp.org", "time.nis.gov");
-
+  strip.clear();
+  strip.show();
   if (client.validateConnection()) {
     Serial.print("Connected to InfluxDB_1: ");
     Serial.println(client.getServerUrl());
@@ -268,7 +270,6 @@ void setup(){
 }
 
 void loop(){
-  delay(10000);
   unsigned long current_time = millis();  //Check if sensors have to be read
   if (current_time - last_PPG_sensor_readout > PPG_SENSOR_READOUT_TIME_MS){
     readPPG = true;
@@ -379,7 +380,17 @@ void loop(){
   if (client.writePoint(X)) {
     //Serial.println("Data sent to InfluxDB successfully!");
     Serial.println("\tAvailable RAM memory: " + String(esp_get_free_heap_size()) + " bytes");
+    strip.setPixelColor(0, strip.Color(255,0,0));
+    strip.show();
+    delay(100);
+    strip.clear();
+    strip.show();
   } else {
+    strip.setPixelColor(0, strip.Color(0,255,0));
+    strip.show();
+    delay(100);
+    strip.clear();
+    strip.show();
     Serial.print("InfluxDB write failed: ");
     Serial.println(client.getLastErrorMessage());
   }
