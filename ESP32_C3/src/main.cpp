@@ -5,6 +5,7 @@
 #include <hp_BH1750.h> 
 #include "filters.h"
 #include <ESP32AnalogRead.h>
+#include <Adafruit_NeoPixel.h>
 
 // Define I2C Addresses
 #define TCAADDR 0x70
@@ -112,6 +113,9 @@ float last_diff = NAN;
 bool crossed = false;
 long crossed_time = 0;
 
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(1, 7, NEO_GRB + NEO_KHZ800);
+
+
 void tcaselect(uint8_t i) {
   if (i > 7) return;
  
@@ -121,6 +125,13 @@ void tcaselect(uint8_t i) {
 }
 
 void setup(){
+  strip.begin();
+  strip.setBrightness(50);
+  strip.show(); // Initialize all pixels to 'off'
+
+  strip.setPixelColor(0, strip.Color(0,0,255));
+  strip.show();
+
     
   delay(5000);    //Delay to let Serial Monitor catch up (Because of CDCBoot)
   adc1.attach(analogPin_sensor_1);
