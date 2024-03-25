@@ -3903,12 +3903,6 @@
 		(uuid "8de592a9-b337-4982-911d-91022c2fddd0")
 	)
 	(junction
-		(at 68.58 132.08)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "91301453-73f7-4299-8a34-56f9e223fa08")
-	)
-	(junction
 		(at 161.29 26.67)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5079,16 +5073,6 @@
 			(type default)
 		)
 		(uuid "6d8e2465-6751-426d-8da9-ad4a2c41cac2")
-	)
-	(wire
-		(pts
-			(xy 74.93 132.08) (xy 68.58 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6f9a998b-c18e-4d73-8107-d4e528178f9e")
 	)
 	(wire
 		(pts
@@ -9381,7 +9365,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23_Handsoldering"
+		(property "Footprint" "Package_SO:Infineon_PG-DSO-8-27_3.9x4.9mm_EP2.65x3mm"
 			(at 71.12 129.54 0)
 			(effects
 				(font
@@ -12933,7 +12917,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Fuse:Fuse_0402_1005Metric"
+		(property "Footprint" "Fuse:Fuse_0805_2012Metric_Pad1.15x1.40mm_HandSolder"
 			(at 63.5 133.858 90)
 			(effects
 				(font
