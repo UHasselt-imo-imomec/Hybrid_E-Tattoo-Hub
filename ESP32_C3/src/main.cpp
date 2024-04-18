@@ -193,13 +193,10 @@ void setup(){
 
   adc1.attach(analogPin_sensor_1);
   adc2.attach(analogPin_sensor_2);
-  //analogSetPinAttenuation(analogPin_sensor_2, ADC_0db);
   adc3.attach(analogPin_sensor_3);
-  //analogSetPinAttenuation(analogPin_sensor_3, ADC_0db);
   adc4.attach(analogPin_sensor_4);
-  //analogSetPinAttenuation(analogPin_sensor_3, ADC_0db);
   adc5.attach(analogPin_sensor_5);
-  //analogSetPinAttenuation(analogPin_sensor_3, ADC_0db);
+  
   Serial.begin(115200);
   Serial.println("Initializing");
   WiFi.mode(WIFI_STA);
