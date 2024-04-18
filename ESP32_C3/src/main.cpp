@@ -327,43 +327,48 @@ void loop(){
   unsigned long current_time = millis();  //Check if sensors have to be read
   if (current_time - last_PPG_sensor_readout > PPG_SENSOR_READOUT_TIME_MS){
     readPPG = true;
+    last_PPG_sensor_readout = current_time;
   }
   if (current_time - last_TEMP_HUM_sensor_readout > TEMP_HUM_SENSOR_READOUT_TIME_MS){
     readTEMP_HUM = true;
+    last_TEMP_HUM_sensor_readout = current_time;
   }
   if (current_time - last_LIGHT_sensor_readout > LIGHT_SENSOR_READOUT_TIME_MS){
     readLIGHT = true;
+    last_LIGHT_sensor_readout = current_time;
   }
   if (current_time - last_ANALOG_TEMP_sensor_1_readout > ANALOG_TEMP_SENSOR_1_READOUT_TIME_MS){
     readAnalog_TEMP_1 = true;
+    last_ANALOG_TEMP_sensor_1_readout = current_time;
   }
   if (current_time - last_ANALOG_TEMP_sensor_2_readout > ANALOG_TEMP_SENSOR_2_READOUT_TIME_MS){
     readAnalog_TEMP_2 = true;
+    last_ANALOG_TEMP_sensor_2_readout = current_time;
   }  
-
-  if (current_time - last_blink > LED_DELAY){
-    readLed = true;
+  if (current_time - last_ANALOG_TEMP_sensor_3_readout > ANALOG_TEMP_SENSOR_4_READOUT_TIME_MS){
+    readAnalog_TEMP_3 = true;
+    last_ANALOG_TEMP_sensor_3_readout = current_time;
   }  
- if (current_time - last_ANALOG_TEMP_sensor_4_readout > ANALOG_TEMP_SENSOR_4_READOUT_TIME_MS){
+  if (current_time - last_ANALOG_TEMP_sensor_4_readout > ANALOG_TEMP_SENSOR_4_READOUT_TIME_MS){
     readAnalog_TEMP_4 = true;
+    last_ANALOG_TEMP_sensor_4_readout = current_time;
   }  
    if (current_time - last_ANALOG_TEMP_sensor_5_readout > ANALOG_TEMP_SENSOR_5_READOUT_TIME_MS){
     readAnalog_TEMP_5 = true;
+    last_ANALOG_TEMP_sensor_5_readout = current_time;
   }  
-  uint32_t ir_value;
-  uint32_t red_value;
-  float temp;
-  float altitude;
-  float pressure;
-  float lux;
-  
+  if (current_time - last_blink > LED_DELAY){
+    readLed = true;
+    last_blink = current_time;
+  } 
+
   if(readPPG){
     readPPG = false;
     tcaselect(PPG_SENSOR);
     auto sample = PPG_sensor.readSample(1000); // De 1000 is de timeout in ms, niet het aantal samples!
     if (sample.valid){  //Check if the sample is valid, then proceed
-      float ir_value = sample.ir;
-      float red_value = sample.red;
+      uint32_t ir_value = sample.ir;
+      uint32_t red_value = sample.red;
       //Serial.printf("IR: %f, Red: %f\n", ir_value, red_value);
       X.addField("ir_value", ir_value);
       X.addField("red_value", red_value);
@@ -444,33 +449,6 @@ void loop(){
     X.addField("temp weerstand 2", R_temp_sensor_2);
   }
 
-
-    // Write the point to InfluxDB
-  if (client.writePoint(X)) {
-    //Serial.println("Data sent to InfluxDB successfully!");
-    //Serial.println("\tAvailable RAM memory: " + String(esp_get_free_heap_size()) + " bytes");
-    /*
-    strip.setPixelColor(0, strip.Color(255,0,0));
-    strip.show();
-    */
-    strip.clear();
-    strip.show();
-  } else {
-    /*
-    strip.setPixelColor(0, strip.Color(0,255,0));
-    strip.show();
-    */
-    strip.clear();
-    strip.show();
-    Serial.print("InfluxDB write failed: ");
-    Serial.println(client.getLastErrorMessage());
-  }
-  // Clear previous data from the point
-  X.clearFields();
-}
-
-  }
-
   if(readAnalog_TEMP_3){
     readAnalog_TEMP_3 = false;
         // subtract the last reading:
@@ -493,6 +471,7 @@ void loop(){
     R_temp_sensor_3 = R2 / ((Vin_sensor_3/average_Vout_sensor_3) - 1);
     //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
     //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
+    X.addField("temp weerstand 3", R_temp_sensor_3);
 
   }
 
@@ -518,7 +497,7 @@ void loop(){
     R_temp_sensor_4 = R2 / ((Vin_sensor_4/average_Vout_sensor_4) - 1);
     //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
     //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
-
+    X.addField("temp weerstand 4", R_temp_sensor_4);
   }
 
   if(readAnalog_TEMP_5){
@@ -543,9 +522,29 @@ void loop(){
     R_temp_sensor_5 = R2 / ((Vin_sensor_5/average_Vout_sensor_5) - 1);
     //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
     //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
-
+    X.addField("temp weerstand 5", R_temp_sensor_5);
   }
 
-  Serial.print("/*" + String(millis()) + "," + ir_value + "," + red_value + "," + temp + "," + pressure + "," + altitude + "," + lux + "," + R_temp_sensor_1 + "," + R_temp_sensor_2 + "," + R_temp_sensor_3 + "," + R_temp_sensor_4 + "," + R_temp_sensor_5 + "*/");
-  Serial.println();  // <- Print an end of line, fixed the issue for me.
+    // Write the point to InfluxDB
+  if (client.writePoint(X)) {
+    //Serial.println("Data sent to InfluxDB successfully!");
+    //Serial.println("\tAvailable RAM memory: " + String(esp_get_free_heap_size()) + " bytes");
+    /*
+    strip.setPixelColor(0, strip.Color(255,0,0));
+    strip.show();
+    */
+    strip.clear();
+    strip.show();
+  } else {
+    /*
+    strip.setPixelColor(0, strip.Color(0,255,0));
+    strip.show();
+    */
+    strip.clear();
+    strip.show();
+    Serial.print("InfluxDB write failed: ");
+    Serial.println(client.getLastErrorMessage());
+  }
+  // Clear previous data from the point
+  X.clearFields();
 }
