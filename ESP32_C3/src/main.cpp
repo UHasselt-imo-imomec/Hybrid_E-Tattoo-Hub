@@ -196,7 +196,7 @@ void setup(){
   adc3.attach(analogPin_sensor_3);
   adc4.attach(analogPin_sensor_4);
   adc5.attach(analogPin_sensor_5);
-  
+
   Serial.begin(115200);
   Serial.println("Initializing");
   WiFi.mode(WIFI_STA);
@@ -526,12 +526,10 @@ void loop(){
   if (client.writePoint(X)) {
     //Serial.println("Data sent to InfluxDB successfully!");
     //Serial.println("\tAvailable RAM memory: " + String(esp_get_free_heap_size()) + " bytes");
-    /*
+
     strip.setPixelColor(0, strip.Color(255,0,0));
     strip.show();
-    */
-    strip.clear();
-    strip.show();
+
   } else {
     /*
     strip.setPixelColor(0, strip.Color(0,255,0));
