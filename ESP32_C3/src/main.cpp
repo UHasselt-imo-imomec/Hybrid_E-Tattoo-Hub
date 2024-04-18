@@ -52,6 +52,9 @@ hp_BH1750 BH1750;       //  create the sensor
 #define TEMP_HUM_SENSOR_READOUT_TIME_MS 1000
 #define ANALOG_TEMP_SENSOR_1_READOUT_TIME_MS 100
 #define ANALOG_TEMP_SENSOR_2_READOUT_TIME_MS 100
+#define ANALOG_TEMP_SENSOR_3_READOUT_TIME_MS 100
+#define ANALOG_TEMP_SENSOR_4_READOUT_TIME_MS 100
+#define ANALOG_TEMP_SENSOR_5_READOUT_TIME_MS 100
 #define LIGHT_SENSOR_READOUT_TIME_MS 5000
 #define LED_DELAY 1000
 unsigned long last_PPG_sensor_readout = 0;
@@ -59,12 +62,18 @@ unsigned long last_TEMP_HUM_sensor_readout = 0;
 unsigned long last_LIGHT_sensor_readout = 0;
 unsigned long last_ANALOG_TEMP_sensor_1_readout = 0;
 unsigned long last_ANALOG_TEMP_sensor_2_readout = 0;
+unsigned long last_ANALOG_TEMP_sensor_3_readout = 0;
+unsigned long last_ANALOG_TEMP_sensor_4_readout = 0;
+unsigned long last_ANALOG_TEMP_sensor_5_readout = 0;
 unsigned long last_blink = 0;
 bool readPPG = false;
 bool readTEMP_HUM = false;
 bool readLIGHT = false;
 bool readAnalog_TEMP_1 = false;
 bool readAnalog_TEMP_2 = false;
+bool readAnalog_TEMP_3 = false;
+bool readAnalog_TEMP_4 = false;
+bool readAnalog_TEMP_5 = false;
 bool readLed = false;
 
 
@@ -73,7 +82,7 @@ bool readLed = false;
 // more the readings will be smoothed, but the slower the output will respond to
 // the input.
 const int numReadings_sensor_1 = 100;
-int analogPin_sensor_1 = 2;
+int analogPin_sensor_1 = 1;
 int readIndex_sensor_1 = 0;            // the index of the current reading
 float readings_sensor_1[numReadings_sensor_1];  // the readings from the analog input
 float total_sensor_1 = 0;              // the running total
@@ -84,7 +93,7 @@ float R2 = 220;
 ESP32AnalogRead adc1;
 
 const int numReadings_sensor_2 = 100;
-int analogPin_sensor_2 = 3;
+int analogPin_sensor_2 = 2;
 int readIndex_sensor_2 = 0;            // the index of the current reading
 float readings_sensor_2[numReadings_sensor_2];  // the readings from the analog input
 float total_sensor_2 = 0;              // the running total
@@ -93,8 +102,37 @@ float Vin_sensor_2 = 3.3;
 float R_temp_sensor_2 = 0;
 ESP32AnalogRead adc2;
 
+const int numReadings_sensor_3 = 100;
+int analogPin_sensor_3 = 3;
+int readIndex_sensor_3 = 0;            // the index of the current reading
+float readings_sensor_3[numReadings_sensor_3];  // the readings from the analog input
+float total_sensor_3 = 0;              // the running total
+float average_Vout_sensor_3 = 0;       // the average voltage
+float Vin_sensor_3 = 3.3;
+float R_temp_sensor_3 = 0;
+ESP32AnalogRead adc3;
+
+const int numReadings_sensor_4 = 100;
+int analogPin_sensor_4 = 0;
+int readIndex_sensor_4 = 0;            // the index of the current reading
+float readings_sensor_4[numReadings_sensor_4];  // the readings from the analog input
+float total_sensor_4 = 0;              // the running total
+float average_Vout_sensor_4 = 0;       // the average voltage
+float Vin_sensor_4 = 3.3;
+float R_temp_sensor_4 = 0;
+ESP32AnalogRead adc4;
+
+const int numReadings_sensor_5 = 100;
+int analogPin_sensor_5 = 4;
+int readIndex_sensor_5 = 0;            // the index of the current reading
+float readings_sensor_5[numReadings_sensor_5];  // the readings from the analog input
+float total_sensor_5 = 0;              // the running total
+float average_Vout_sensor_5 = 0;       // the average voltage
+float Vin_sensor_5 = 3.3;
+float R_temp_sensor_5 = 0;
+ESP32AnalogRead adc5;
 // Predefined sensor channels (MUX channel#)
-enum sensorchannels {PPG_SENSOR = 1, TEMP_HUM_SENSOR = 3, LIGHT_SENSOR = 7};
+enum sensorchannels {PPG_SENSOR = 0, TEMP_HUM_SENSOR = 2, LIGHT_SENSOR = 3};
 
 // PPG_sensor (adjust to your sensor type)
 MAX30105 PPG_sensor;    //Controleren, ik ben niet zeker of dit de juiste sensor is!
@@ -155,7 +193,13 @@ void setup(){
 
   adc1.attach(analogPin_sensor_1);
   adc2.attach(analogPin_sensor_2);
-
+  //analogSetPinAttenuation(analogPin_sensor_2, ADC_0db);
+  adc3.attach(analogPin_sensor_3);
+  //analogSetPinAttenuation(analogPin_sensor_3, ADC_0db);
+  adc4.attach(analogPin_sensor_4);
+  //analogSetPinAttenuation(analogPin_sensor_3, ADC_0db);
+  adc5.attach(analogPin_sensor_5);
+  //analogSetPinAttenuation(analogPin_sensor_3, ADC_0db);
   Serial.begin(115200);
   Serial.println("Initializing");
   WiFi.mode(WIFI_STA);
@@ -237,7 +281,7 @@ void setup(){
     Serial.println("No BH1750 sensor found!");
     while (true) {}; 
   }
-
+  
   /* Initialise the 3rd sensor (Temp/Hum sensor)*/
   tcaselect(TEMP_HUM_SENSOR);
   unsigned status;
@@ -265,7 +309,15 @@ void setup(){
   for (int thisReading = 0; thisReading < numReadings_sensor_2; thisReading++) { // initialize all the readings of analog sensor to 0:
     readings_sensor_2[thisReading] = 0;
   }
-
+  for (int thisReading = 0; thisReading < numReadings_sensor_3; thisReading++) { // initialize all the readings of analog sensor to 0:
+    readings_sensor_3[thisReading] = 0;
+  }
+  for (int thisReading = 0; thisReading < numReadings_sensor_4; thisReading++) { // initialize all the readings of analog sensor to 0:
+    readings_sensor_4[thisReading] = 0;
+  }
+  for (int thisReading = 0; thisReading < numReadings_sensor_5; thisReading++) { // initialize all the readings of analog sensor to 0:
+    readings_sensor_5[thisReading] = 0;
+  }
   Serial.println("Aight lets cook");
   Serial.println(WiFi.getTxPower());
 }
@@ -292,18 +344,19 @@ void loop(){
   if (current_time - last_blink > LED_DELAY){
     readLed = true;
   }  
-
-  if(client.isBufferEmpty()){
-    strip.setPixelColor(0, strip.Color(255,0,255));
-    strip.show();
-  }
-
-  if(readLed){
-    readLed = false;
-    strip.clear();
-    strip.show();
-  }
-
+ if (current_time - last_ANALOG_TEMP_sensor_4_readout > ANALOG_TEMP_SENSOR_4_READOUT_TIME_MS){
+    readAnalog_TEMP_4 = true;
+  }  
+   if (current_time - last_ANALOG_TEMP_sensor_5_readout > ANALOG_TEMP_SENSOR_5_READOUT_TIME_MS){
+    readAnalog_TEMP_5 = true;
+  }  
+  uint32_t ir_value;
+  uint32_t red_value;
+  float temp;
+  float altitude;
+  float pressure;
+  float lux;
+  
   if(readPPG){
     readPPG = false;
     tcaselect(PPG_SENSOR);
@@ -319,7 +372,7 @@ void loop(){
       Serial.println("Sample not valid, probably the timeout is too short!");
     }
   }
-    
+  
   if(readTEMP_HUM){  
     readTEMP_HUM = false;
     tcaselect(TEMP_HUM_SENSOR);
@@ -332,7 +385,7 @@ void loop(){
     X.addField("Pressure", pressure);
     X.addField("Altitude", altitude);
   }
-
+  
   if(readLIGHT){
     readLIGHT = false;
     tcaselect(LIGHT_SENSOR);
@@ -341,8 +394,7 @@ void loop(){
     //Serial.printf("Light: %f\n", lux);
     X.addField("Lux", lux);
   }
-
-
+  
   if(readAnalog_TEMP_1){
     readAnalog_TEMP_1 = false;
         // subtract the last reading:
@@ -415,4 +467,85 @@ void loop(){
   }
   // Clear previous data from the point
   X.clearFields();
+}
+
+  }
+
+  if(readAnalog_TEMP_3){
+    readAnalog_TEMP_3 = false;
+        // subtract the last reading:
+    total_sensor_3 = total_sensor_3 - readings_sensor_3[readIndex_sensor_3];
+    // read from the sensor:
+    readings_sensor_3[readIndex_sensor_3] = adc3.readVoltage();
+    // add the reading to the total:
+    total_sensor_3 = total_sensor_3 + readings_sensor_3[readIndex_sensor_3];
+    // advance to the next position in the array:
+    readIndex_sensor_3 = readIndex_sensor_3 + 1;
+
+    // if we're at the end of the array...
+    if (readIndex_sensor_3 >= numReadings_sensor_3) {
+      // ...wrap around to the beginning:
+      readIndex_sensor_3 = 0;
+    }
+
+    // calculate the average:
+    average_Vout_sensor_3 = total_sensor_3 / numReadings_sensor_3;
+    R_temp_sensor_3 = R2 / ((Vin_sensor_3/average_Vout_sensor_3) - 1);
+    //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
+    //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
+
+  }
+
+  if(readAnalog_TEMP_4){
+    readAnalog_TEMP_4 = false;
+        // subtract the last reading:
+    total_sensor_4 = total_sensor_4 - readings_sensor_4[readIndex_sensor_4];
+    // read from the sensor:
+    readings_sensor_4[readIndex_sensor_4] = adc4.readVoltage();
+    // add the reading to the total:
+    total_sensor_4 = total_sensor_4 + readings_sensor_4[readIndex_sensor_4];
+    // advance to the next position in the array:
+    readIndex_sensor_4 = readIndex_sensor_4 + 1;
+
+    // if we're at the end of the array...
+    if (readIndex_sensor_4 >= numReadings_sensor_4) {
+      // ...wrap around to the beginning:
+      readIndex_sensor_4 = 0;
+    }
+
+    // calculate the average:
+    average_Vout_sensor_4 = total_sensor_4 / numReadings_sensor_4;
+    R_temp_sensor_4 = R2 / ((Vin_sensor_4/average_Vout_sensor_4) - 1);
+    //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
+    //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
+
+  }
+
+  if(readAnalog_TEMP_5){
+    readAnalog_TEMP_5 = false;
+        // subtract the last reading:
+    total_sensor_5 = total_sensor_5 - readings_sensor_5[readIndex_sensor_5];
+    // read from the sensor:
+    readings_sensor_5[readIndex_sensor_5] = adc5.readVoltage();
+    // add the reading to the total:
+    total_sensor_5 = total_sensor_5 + readings_sensor_5[readIndex_sensor_5];
+    // advance to the next position in the array:
+    readIndex_sensor_5 = readIndex_sensor_5 + 1;
+
+    // if we're at the end of the array...
+    if (readIndex_sensor_5 >= numReadings_sensor_5) {
+      // ...wrap around to the beginning:
+      readIndex_sensor_5 = 0;
+    }
+
+    // calculate the average:
+    average_Vout_sensor_5 = total_sensor_5 / numReadings_sensor_5;
+    R_temp_sensor_5 = R2 / ((Vin_sensor_5/average_Vout_sensor_5) - 1);
+    //Serial.printf("Vout: %f, R1: %f\n", average_Vout, R1);
+    //T_temp_sensor_2 = (R_temp_sensor_2/0.269) - (119.398/0.269);
+
+  }
+
+  Serial.print("/*" + String(millis()) + "," + ir_value + "," + red_value + "," + temp + "," + pressure + "," + altitude + "," + lux + "," + R_temp_sensor_1 + "," + R_temp_sensor_2 + "," + R_temp_sensor_3 + "," + R_temp_sensor_4 + "," + R_temp_sensor_5 + "*/");
+  Serial.println();  // <- Print an end of line, fixed the issue for me.
 }
