@@ -5428,7 +5428,7 @@
 	)
 	(wire
 		(pts
-			(xy 102.87 102.87) (xy 102.87 107.95)
+			(xy 102.87 102.87) (xy 102.87 105.41)
 		)
 		(stroke
 			(width 0)
@@ -5638,7 +5638,7 @@
 	)
 	(wire
 		(pts
-			(xy 110.49 123.19) (xy 113.03 123.19)
+			(xy 110.49 120.65) (xy 113.03 120.65)
 		)
 		(stroke
 			(width 0)
@@ -6668,7 +6668,7 @@
 	)
 	(wire
 		(pts
-			(xy 100.33 118.11) (xy 102.87 118.11)
+			(xy 100.33 115.57) (xy 102.87 115.57)
 		)
 		(stroke
 			(width 0)
@@ -7068,7 +7068,7 @@
 	)
 	(wire
 		(pts
-			(xy 110.49 105.41) (xy 110.49 118.11)
+			(xy 110.49 105.41) (xy 110.49 115.57)
 		)
 		(stroke
 			(width 0)
@@ -7108,7 +7108,7 @@
 	)
 	(wire
 		(pts
-			(xy 113.03 105.41) (xy 113.03 123.19)
+			(xy 113.03 105.41) (xy 113.03 120.65)
 		)
 		(stroke
 			(width 0)
@@ -7388,7 +7388,7 @@
 	)
 	(wire
 		(pts
-			(xy 100.33 123.19) (xy 102.87 123.19)
+			(xy 100.33 120.65) (xy 102.87 120.65)
 		)
 		(stroke
 			(width 0)
@@ -7935,7 +7935,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 102.87 107.95 0)
+		(at 102.87 105.41 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7944,7 +7944,7 @@
 		(fields_autoplaced yes)
 		(uuid "0a2bad9e-baa1-4df8-badd-5bd32d201c77")
 		(property "Reference" "#PWR015"
-			(at 102.87 114.3 0)
+			(at 102.87 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7953,7 +7953,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 102.87 111.76 90)
+			(at 102.87 109.22 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7962,7 +7962,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 102.87 107.95 0)
+			(at 102.87 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7971,7 +7971,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 102.87 107.95 0)
+			(at 102.87 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7980,7 +7980,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 102.87 107.95 0)
+			(at 102.87 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8002,7 +8002,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 106.68 123.19 90)
+		(at 106.68 120.65 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8010,7 +8010,7 @@
 		(dnp no)
 		(uuid "0ae83eb3-4b24-48e5-9133-b56e6f7a129c")
 		(property "Reference" "R4"
-			(at 107.95 125.73 90)
+			(at 107.95 123.19 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8018,7 +8018,7 @@
 			)
 		)
 		(property "Value" "1K"
-			(at 104.14 125.73 90)
+			(at 104.14 123.19 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8026,7 +8026,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 106.68 124.968 90)
+			(at 106.68 122.428 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8035,7 +8035,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 106.68 123.19 0)
+			(at 106.68 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8044,7 +8044,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 106.68 123.19 0)
+			(at 106.68 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8760,7 +8760,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3V")
-		(at 100.33 118.11 90)
+		(at 100.33 115.57 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8768,7 +8768,7 @@
 		(dnp no)
 		(uuid "2de8499a-08f7-45f9-823e-58100d96ddcc")
 		(property "Reference" "#PWR016"
-			(at 104.14 118.11 0)
+			(at 104.14 115.57 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8777,7 +8777,7 @@
 			)
 		)
 		(property "Value" "+3.3V"
-			(at 96.52 118.11 90)
+			(at 96.52 115.57 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8786,7 +8786,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 100.33 118.11 0)
+			(at 100.33 115.57 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8795,7 +8795,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 100.33 118.11 0)
+			(at 100.33 115.57 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8804,7 +8804,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 100.33 118.11 0)
+			(at 100.33 115.57 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9165,7 +9165,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 106.68 118.11 90)
+		(at 106.68 115.57 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9173,7 +9173,7 @@
 		(dnp no)
 		(uuid "42d236ff-cb86-44d0-ba98-9eef7ae16b3b")
 		(property "Reference" "R1"
-			(at 107.95 120.65 90)
+			(at 107.95 118.11 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9181,7 +9181,7 @@
 			)
 		)
 		(property "Value" "1K"
-			(at 104.14 120.65 90)
+			(at 104.14 118.11 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9189,7 +9189,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 106.68 119.888 90)
+			(at 106.68 117.348 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9198,7 +9198,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 106.68 118.11 0)
+			(at 106.68 115.57 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9207,7 +9207,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 106.68 118.11 0)
+			(at 106.68 115.57 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10584,7 +10584,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3V")
-		(at 100.33 123.19 90)
+		(at 100.33 120.65 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -10592,7 +10592,7 @@
 		(dnp no)
 		(uuid "7b0f2783-305e-48e2-99d3-8f8672b96957")
 		(property "Reference" "#PWR019"
-			(at 104.14 123.19 0)
+			(at 104.14 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10601,7 +10601,7 @@
 			)
 		)
 		(property "Value" "+3.3V"
-			(at 96.52 123.19 90)
+			(at 96.52 120.65 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10610,7 +10610,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 100.33 123.19 0)
+			(at 100.33 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10619,7 +10619,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 100.33 123.19 0)
+			(at 100.33 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10628,7 +10628,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 100.33 123.19 0)
+			(at 100.33 120.65 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12739,7 +12739,7 @@
 		(dnp no)
 		(uuid "bb3241d9-c547-48dc-825d-1ad0ce3bd75a")
 		(property "Reference" "J4"
-			(at 17.018 85.598 0)
+			(at 26.67 100.838 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12747,7 +12747,7 @@
 			)
 		)
 		(property "Value" "Conn_01x06"
-			(at 17.78 89.916 0)
+			(at 26.67 103.632 0)
 			(effects
 				(font
 					(size 1.27 1.27)
