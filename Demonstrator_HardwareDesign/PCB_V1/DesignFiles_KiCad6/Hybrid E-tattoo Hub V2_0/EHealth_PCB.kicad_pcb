@@ -14018,7 +14018,7 @@
 		(path "/0b8f8b33-f398-4f82-b38b-bdb21e2c0ad9")
 		(sheetname "Hoofd")
 		(sheetfile "EHealth_PCB.kicad_sch")
-		(attr through_hole)
+		(attr through_hole dnp)
 		(fp_line
 			(start 1.33 0.704288)
 			(end 1.331834 11.862623)
@@ -15784,7 +15784,7 @@
 		(path "/7cb29ac1-35c7-44f7-8ab0-08dbee1f7af3")
 		(sheetname "Hoofd")
 		(sheetfile "EHealth_PCB.kicad_sch")
-		(attr through_hole)
+		(attr through_hole dnp)
 		(fp_line
 			(start 1.33 -7.5)
 			(end -1.33 -7.5)
