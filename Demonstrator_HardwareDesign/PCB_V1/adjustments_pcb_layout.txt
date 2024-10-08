@@ -1,0 +1,35 @@
+--  BASIC PCB 
+    
+    ANALOG SENSORS
+    pin A5 -> pin A4
+    pin A4 -> pin A3 (verbeteren)
+    pin A3 -> pin A2 (verbeteren)
+    pin A1 en pin A0 erbij plaatsen
+
+    SPI pinnen verdwijnen (J4-OffTheShelf-Digital1)
+    MISO, MOSI, SCK, CS
+    
+
+--  ADVANCED PCB
+
+    ANALOG SENSORS
+    pin A5 -> pin A4
+    pin A4 - p>in A3 (verbeteren)
+    pin A3 -> pin A2 (verbeteren)
+    voorschakel weerstanden aanpassen
+
+    voorschakel weerstanden configureren -> opamp gebruiken -> plaats voorzien van opamp 
+    (https://www.ti.com/lit/ds/symlink/lt1014d-ep.pdf?ts=1710494152551&ref_url=https%253A%252F%252Fwww.google.com%252F)
+
+    Analoge multiplexer erbij plaatsen?
+
+    SPI pinnen verdwijnen (J4-OffTheShelf-Digital1)
+    MISO, MOSI, SCK, CS
+    
+    huidige boost convertor pinnen connecten met interconnect
+    pinnen j5 - power1 pinnen verdwijnen
+
+
+ToDo: 
+* Add reverse voltage protection (5V)
+* Add fuse for overcurrent protection (500mA?) 
