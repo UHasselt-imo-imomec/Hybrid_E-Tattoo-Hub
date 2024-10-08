@@ -76,15 +76,15 @@ void tcaselect(uint8_t i) {
   Wire.endTransmission();  
 }
 
-void setup(){
-    
-  delay(5000);    //Delay to let Serial Monitor catch up (Because of CDCBoot)
+void setup(){  
+  delay(5000);    //Delay to let Serial Monitor catch up (Because of CDC_Boot)
   Serial.begin(115200);
   Serial.println("Initializing");
 
-  Wire.begin();
+  Wire.begin(8,10,100000);  //SDA, SCL, Frequency
   Serial.println("\nTCAScanner ready!");  //Scan all TCA ports for I2C devices, and report back immediately upon finding one.
   
+  while(1){
   for (uint8_t t=0; t<8; t++) {
     tcaselect(t);
     Serial.print("TCA Port #"); Serial.println(t);
@@ -100,6 +100,8 @@ void setup(){
   }
   Serial.println("\ndone");
   Serial.println("alles effe testen"); Serial.println("");
+  delay(5000);
+  }
   
   /* Initialise the 1st PPG_sensor */ //--> Dit kan dynamisch gemaakt worden, maar ik zou hier niet te veel tijd aan besteden! 
   tcaselect(PPG_SENSOR);
@@ -124,16 +126,15 @@ void setup(){
   unsigned status;
   status = bmp.begin(BMP280_ADDRESS);
   if (!status) {  //List possible errors
-    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
-                      "try a different address!"));
-    Serial.print("SensorID was: 0x"); Serial.println(bmp.sensorID(),16);
-    Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
-    Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
-    Serial.print("        ID of 0x60 represents a BME 280.\n");
-    Serial.print("        ID of 0x61 represents a BME 680.\n");
+    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or try a different address!"));
+    Serial.print(F("SensorID was: 0x")); Serial.println(bmp.sensorID(),16);
+    Serial.print(F("\tID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n"));
+    Serial.print(F("\tID of 0x56-0x58 represents a BMP 280,\n"));
+    Serial.print(F("\tID of 0x60 represents a BME 280.\n"));
+    Serial.print(F("\tID of 0x61 represents a BME 680.\n"));
     while (1) delay(10);
   }
-
+  //Config the found BMP280 sensor
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,    
                   Adafruit_BMP280::SAMPLING_X2,     
                   Adafruit_BMP280::SAMPLING_X16,    
@@ -162,12 +163,12 @@ void loop(){
     tcaselect(PPG_SENSOR);
     auto sample = PPG_sensor.readSample(1000); // De 1000 is de timeout in ms, niet het aantal samples!
     if (sample.valid){  //Check if the sample is valid, then proceed
-      uint32_t ir_value = sample.ir;  //Check datatype!
-      uint32_t red_value = sample.red; //Check datatype!
+      uint32_t ir_value = sample.ir;
+      uint32_t red_value = sample.red;
       Serial.printf("IR: %d, Red: %d\n", ir_value, red_value);
     }
     else{
-      Serial.println("Sample not valid, probably the timeout is too short!");
+      Serial.println("Sample not valid, probably the timeout might be too short!");
     }
   }
     
